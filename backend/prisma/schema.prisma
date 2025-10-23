@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  company   String?
+
+  // ClickUp integration
+  clickupApiKey     String?
+  clickupTeamId     String?
+  clickupListId     String?
+  clickupConnected  Boolean  @default(false)
+
+  // Relations
+  meetings  Meeting[]
+  usage     Usage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("users")
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  meetingUrl  String
+  platform    String   // zoom, meet, teams, webex, other
+
+  // Recall.ai integration
+  recallBotId   String?  @unique
+  recordingUrl  String?
+
+  // Status tracking
+  status        String   @default("scheduled") // scheduled, recording, processing, completed, failed
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  endedAt       DateTime?
+
+  // Duration in minutes
+  duration      Int?
+
+  // ClickUp integration
+  clickupListId String?
+
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcript  Transcript?
+  summary     Summary?
+  tasks       Task[]
+  usage       Usage?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([recallBotId])
+  @@map("meetings")
+}
+
+model Transcript {
+  id         String   @id @default(uuid())
+  content    String   @db.Text
+
+  // Relations
+  meetingId  String   @unique
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([meetingId])
+  @@map("transcripts")
+}
+
+model Summary {
+  id         String   @id @default(uuid())
+  content    String   @db.Text
+
+  // Relations
+  meetingId  String   @unique
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([meetingId])
+  @@map("summaries")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?   @db.Text
+  priority    String    @default("medium") // low, medium, high, urgent
+  status      String    @default("pending") // pending, in_progress, completed
+  dueDate     DateTime?
+  assignee    String?
+
+  // ClickUp integration
+  clickupTaskId String?   @unique
+  syncedAt      DateTime?
+
+  // Relations
+  meetingId   String
+  meeting     Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([meetingId])
+  @@index([status])
+  @@index([clickupTaskId])
+  @@map("tasks")
+}
+
+model Usage {
+  id        String   @id @default(uuid())
+  minutes   Int      // Duration in minutes
+  cost      Float    // Cost in USD
+
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetingId String   @unique
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("usage")
+}
