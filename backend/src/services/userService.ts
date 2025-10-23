@@ -89,7 +89,7 @@ export class UserService {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        clickupApiKey: apiKey,
+        clickupAccessToken: apiKey,
         clickupTeamId: teamId,
         clickupConnected: true,
       },
@@ -102,7 +102,7 @@ export class UserService {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        clickupApiKey: null,
+        clickupAccessToken: null,
         clickupTeamId: null,
         clickupListId: null,
         clickupConnected: false,

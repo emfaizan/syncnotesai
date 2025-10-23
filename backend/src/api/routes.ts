@@ -17,7 +17,7 @@ router.use('/usage', usageRoutes);
 router.use('/users', userRoutes);
 
 // API info endpoint
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({
     name: 'SyncNotesAI API',
     version: '1.0.0',

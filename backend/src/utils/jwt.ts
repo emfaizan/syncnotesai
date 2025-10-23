@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 interface TokenPayload {
   id: string;
@@ -7,14 +7,13 @@ interface TokenPayload {
 
 export const generateToken = (payload: TokenPayload): string => {
   const jwtSecret = process.env.JWT_SECRET;
-  const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
   if (!jwtSecret) {
     throw new Error('JWT_SECRET is not defined');
   }
 
   return jwt.sign(payload, jwtSecret, {
-    expiresIn: jwtExpiresIn,
+    expiresIn: '7d',
   });
 };
 
