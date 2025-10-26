@@ -9,6 +9,7 @@ import { rateLimiter } from './middleware/rateLimiter';
 import routes from './api/routes';
 import { logger } from './utils/logger';
 import { connectDatabase } from './config/database';
+import { autoJoinScheduler } from './services/autoJoinScheduler';
 
 // Load environment variables
 dotenv.config();
@@ -38,7 +39,7 @@ app.use(requestLogger);
 app.use(rateLimiter);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -62,10 +63,14 @@ const startServer = async () => {
     // Connect to database
     await connectDatabase();
 
+    // Start auto-join scheduler
+    autoJoinScheduler.start();
+
     app.listen(PORT, () => {
       logger.info(`🚀 Server is running on port ${PORT}`);
       logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🔗 API available at http://localhost:${PORT}/api`);
+      logger.info(`📅 Auto-join scheduler started`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -76,13 +81,28 @@ const startServer = async () => {
 // Handle unhandled rejections
 process.on('unhandledRejection', (reason: Error) => {
   logger.error('Unhandled Rejection:', reason);
+  autoJoinScheduler.stop();
   process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
   logger.error('Uncaught Exception:', error);
+  autoJoinScheduler.stop();
   process.exit(1);
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  autoJoinScheduler.stop();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  autoJoinScheduler.stop();
+  process.exit(0);
 });
 
 startServer();

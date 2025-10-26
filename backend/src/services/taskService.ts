@@ -51,19 +51,19 @@ export class TaskService {
       where: { id: userId },
     });
 
-    if (!user?.clickupApiKey) {
+    if (!user?.clickupAccessToken) {
       throw new AppError('ClickUp not connected. Please connect your ClickUp account first.', 400);
     }
 
     // Sync to ClickUp
     const clickupTask = await this.clickupService.createTask(
-      user.clickupApiKey,
+      user.clickupAccessToken,
       task.meeting.clickupListId || user.clickupListId || '',
       {
         name: task.title,
         description: task.description || '',
         priority: task.priority,
-        dueDate: task.dueDate,
+        dueDate: task.dueDate || undefined,
       }
     );
 

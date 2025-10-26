@@ -5,6 +5,7 @@ import taskRoutes from './routes/taskRoutes';
 import webhookRoutes from './routes/webhookRoutes';
 import usageRoutes from './routes/usageRoutes';
 import userRoutes from './routes/userRoutes';
+import calendarRoutes from './routes/calendarRoutes';
 
 const router = Router();
 
@@ -15,9 +16,10 @@ router.use('/tasks', taskRoutes);
 router.use('/webhooks', webhookRoutes);
 router.use('/usage', usageRoutes);
 router.use('/users', userRoutes);
+router.use('/calendar', calendarRoutes);
 
 // API info endpoint
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({
     name: 'SyncNotesAI API',
     version: '1.0.0',
@@ -29,6 +31,7 @@ router.get('/', (req, res) => {
       webhooks: '/api/webhooks',
       usage: '/api/usage',
       users: '/api/users',
+      calendar: '/api/calendar',
     },
   });
 });

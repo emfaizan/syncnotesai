@@ -16,7 +16,9 @@ export class MeetingController {
 
       res.status(200).json({
         success: true,
-        data: meetings,
+        data: {
+          meetings,
+        },
       });
     } catch (error) {
       next(error);

@@ -7,16 +7,16 @@ export class RecallService {
 
   constructor() {
     const apiKey = process.env.RECALL_API_KEY;
-    const apiUrl = process.env.RECALL_API_URL || 'https://api.recall.ai/api/v1';
+    const apiUrl = process.env.API_BASE_URL || 'https://us-west-2.recall.ai';
 
     if (!apiKey) {
       throw new Error('RECALL_API_KEY is not configured');
     }
 
     this.client = axios.create({
-      baseURL: apiUrl,
+      baseURL: `${apiUrl}/api/v1`,
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Token ${apiKey}`,
         'Content-Type': 'application/json',
       },
     });
@@ -29,20 +29,34 @@ export class RecallService {
     try {
       logger.info(`Starting Recall bot for meeting: ${meetingUrl}`);
 
-      const response = await this.client.post('/bots', {
+      const response = await this.client.post('/bot/', {
         meeting_url: meetingUrl,
         bot_name: 'SyncNotesAI',
-        transcription_options: {
-          provider: 'default',
+        recording_config: {
+          transcript: {
+            provider: {
+              recallai_streaming: {
+                language_code: 'auto',
+                mode: 'prioritize_accuracy',
+              },
+            },
+          },
+          video_mixed_layout: 'speaker_view',
         },
-        recording_mode: 'speaker_view',
       });
 
       logger.info(`Recall bot started: ${response.data.id}`);
 
       return response.data;
     } catch (error: any) {
-      logger.error('Error starting Recall bot:', error.response?.data || error.message);
+      logger.error('Error starting Recall bot:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url,
+        method: error.config?.method,
+      });
       throw new AppError('Failed to start recording', 500);
     }
   }

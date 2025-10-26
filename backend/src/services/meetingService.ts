@@ -25,13 +25,25 @@ export class MeetingService {
   }
 
   async createMeeting(userId: string, meetingData: any) {
-    return prisma.meeting.create({
+    // Start recording via Recall.ai immediately
+    const recallBot = await this.recallService.startRecording(meetingData.meetingUrl);
+
+    // Create meeting in database with Recall bot ID
+    const meeting = await prisma.meeting.create({
       data: {
-        ...meetingData,
+        title: meetingData.title,
+        description: meetingData.description,
+        meetingUrl: meetingData.meetingUrl,
+        platform: meetingData.platform,
+        clickupListId: meetingData.clickupListId,
         userId,
-        status: 'scheduled',
+        status: 'recording',
+        recallBotId: recallBot.id,
+        startedAt: new Date(),
       },
     });
+
+    return meeting;
   }
 
   async getMeetingById(meetingId: string, userId: string) {
