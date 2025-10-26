@@ -40,7 +40,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword: _, ...registerData } = formData;
       await authService.register(registerData);
       toast.success('Account created successfully!');
       router.push('/dashboard');
