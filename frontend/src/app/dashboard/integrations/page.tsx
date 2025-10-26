@@ -17,8 +17,8 @@ interface Integration {
 
 export default function IntegrationsPage() {
   const [clickupConnected, setClickupConnected] = useState(false);
-  const [calendarConnected, setCalendarConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [calendarConnected, _setCalendarConnected] = useState(false);
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadIntegrationStatus();
@@ -30,8 +30,8 @@ export default function IntegrationsPage() {
       const user = res.data.data;
       setClickupConnected(user.clickupConnected || false);
       // TODO: Add calendar connection check
-    } catch (error) {
-      console.error('Failed to load integration status:', error);
+    } catch (_error) {
+      console.error('Failed to load integration status:', _error);
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ export default function IntegrationsPage() {
       const authUrl = res.data.data.url;
       // Open OAuth window
       window.location.href = authUrl;
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to initiate ClickUp connection');
     }
   };
@@ -57,13 +57,13 @@ export default function IntegrationsPage() {
       await clickupAPI.disconnect();
       setClickupConnected(false);
       toast.success('ClickUp disconnected successfully');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to disconnect ClickUp');
     }
   };
 
   const handleCalendarConnect = () => {
-    toast.info('Google Calendar integration coming soon!');
+    toast('Google Calendar integration coming soon!', { icon: 'ℹ️' });
   };
 
   const integrations: Integration[] = [

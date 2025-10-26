@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { billingAPI } from '@/lib/api';
-import { Clock, DollarSign, TrendingUp, CreditCard, Check, Zap } from 'lucide-react';
+import { Clock, TrendingUp, CreditCard, Check, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Plan {
@@ -76,20 +76,20 @@ export default function BillingPage() {
       setBillingSummary(res.data.data);
       setAutoTopUp(res.data.data.autoTopUp);
       setAutoTopUpAmount(res.data.data.autoTopUpAmount);
-    } catch (error) {
-      console.error('Failed to load billing data:', error);
+    } catch (_error) {
+      console.error('Failed to load billing data:', _error);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePurchaseCredits = async () => {
-    toast.info('Stripe integration required. This will open a payment modal.');
+    toast('Stripe integration required. This will open a payment modal.', { icon: 'ℹ️' });
     // TODO: Integrate with Stripe Elements
   };
 
-  const handleUpgradePlan = async (planId: string) => {
-    toast.info('Stripe integration required. This will open a payment modal.');
+  const handleUpgradePlan = async (_planId: string) => {
+    toast('Stripe integration required. This will open a payment modal.', { icon: 'ℹ️' });
     // TODO: Integrate with Stripe Elements
   };
 
@@ -98,7 +98,7 @@ export default function BillingPage() {
       await billingAPI.configureAutoTopUp(!autoTopUp, autoTopUpAmount);
       setAutoTopUp(!autoTopUp);
       toast.success(`Auto top-up ${!autoTopUp ? 'enabled' : 'disabled'}`);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update auto top-up settings');
     }
   };
