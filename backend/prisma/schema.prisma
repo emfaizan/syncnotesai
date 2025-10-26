@@ -1,0 +1,318 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  company   String?
+
+  // Billing
+  plan              String   @default("free") // free, pro, team
+  credits           Float    @default(120.0) // Credits in minutes (2 hours for free plan)
+  stripeCustomerId  String?  @unique
+  stripeSubscriptionId String?
+  autoTopUp         Boolean  @default(false)
+  autoTopUpAmount   Float    @default(600.0) // 10 hours default
+
+  // Recording retention settings
+  recordingRetentionDays Int     @default(7) // Delete recordings after N days
+
+  // ClickUp integration
+  clickupAccessToken  String?
+  clickupRefreshToken String?
+  clickupTeamId       String?
+  clickupListId       String?
+  clickupConnected    Boolean  @default(false)
+  clickupTokenExpiry  DateTime?
+
+  // Calendar integration settings
+  autoJoinEnabled     Boolean  @default(false) // Enable automatic bot joining
+  autoJoinLeadTime    Int      @default(2)     // Minutes before meeting to join (default 2)
+
+  // Relations
+  meetings          Meeting[]
+  usage             Usage[]
+  transactions      Transaction[]
+  subscriptions     Subscription[]
+  calendarConnections CalendarConnection[]
+  tasks             Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([stripeCustomerId])
+  @@map("users")
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  meetingUrl  String
+  platform    String   // zoom, meet, teams, webex, other
+
+  // Recall.ai integration
+  recallBotId   String?  @unique
+  recordingUrl  String?
+
+  // Recording retention
+  recordingDeletionDate DateTime? // Date when recording will be auto-deleted
+  errorMessage          String?   // Error message if meeting failed
+
+  // Status tracking
+  status        String   @default("scheduled") // scheduled, recording, processing, completed, failed, error
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  endedAt       DateTime?
+
+  // Duration in minutes
+  duration      Int?
+
+  // ClickUp integration
+  clickupListId String?
+
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcript  Transcript?
+  summary     Summary?
+  tasks       Task[]
+  usage       Usage?
+  calendarEvent CalendarEvent?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([recallBotId])
+  @@map("meetings")
+}
+
+model Transcript {
+  id         String   @id @default(uuid())
+  content    String   @db.Text
+
+  // Relations
+  meetingId  String   @unique
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([meetingId])
+  @@map("transcripts")
+}
+
+model Summary {
+  id         String   @id @default(uuid())
+  content    String   @db.Text
+
+  // Relations
+  meetingId  String   @unique
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([meetingId])
+  @@map("summaries")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?   @db.Text
+  priority    String    @default("medium") // low, medium, high, urgent
+  status      String    @default("pending") // pending, in_progress, completed
+  dueDate     DateTime?
+  assignee    String?
+
+  // ClickUp integration
+  clickupTaskId String?   @unique
+  syncedAt      DateTime?
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetingId   String
+  meeting     Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([meetingId])
+  @@index([status])
+  @@index([clickupTaskId])
+  @@map("tasks")
+}
+
+model Usage {
+  id        String   @id @default(uuid())
+  minutes   Int      // Duration in minutes
+  cost      Float    // Cost in USD
+
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetingId String   @unique
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("usage")
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  type            String   // purchase, usage, refund, auto_topup
+  amount          Float    // Amount in USD
+  credits         Float    // Credits in minutes
+  status          String   @default("pending") // pending, completed, failed
+
+  // Stripe
+  stripePaymentIntentId String? @unique
+  stripeChargeId        String? @unique
+
+  description String?
+  metadata    Json?
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model Subscription {
+  id              String    @id @default(uuid())
+  plan            String    // pro, team
+  status          String    // active, canceled, past_due, incomplete
+
+  // Pricing
+  amount          Float     // Monthly amount in USD
+  currency        String    @default("usd")
+
+  // Stripe
+  stripeSubscriptionId String @unique
+  stripePriceId        String
+  stripeProductId      String
+
+  // Subscription period
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  canceledAt         DateTime?
+  cancelAtPeriodEnd  Boolean  @default(false)
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+// Calendar integration models
+model CalendarConnection {
+  id              String    @id @default(uuid())
+  provider        String    // google, microsoft, apple
+
+  // OAuth tokens
+  accessToken     String    @db.Text
+  refreshToken    String?   @db.Text
+  tokenExpiry     DateTime
+
+  // Calendar details
+  calendarId      String    // External calendar ID
+  calendarEmail   String    // Calendar email address
+  calendarName    String?   // Calendar display name
+
+  // Webhook details for push notifications
+  webhookChannelId   String?  @unique // Google Calendar channel ID
+  webhookResourceId  String?          // Google Calendar resource ID
+  webhookExpiry      DateTime?        // When webhook expires
+
+  // Settings
+  isActive        Boolean   @default(true)
+  syncEnabled     Boolean   @default(true)
+  lastSyncAt      DateTime?
+
+  // Relations
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calendarEvents  CalendarEvent[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, provider, calendarEmail])
+  @@index([userId])
+  @@index([provider])
+  @@index([webhookChannelId])
+  @@map("calendar_connections")
+}
+
+model CalendarEvent {
+  id                String    @id @default(uuid())
+
+  // External calendar event details
+  externalEventId   String    // Calendar provider's event ID
+  title             String
+  description       String?   @db.Text
+  startTime         DateTime
+  endTime           DateTime
+  timezone          String?
+
+  // Meeting link details
+  meetingUrl        String?   // Extracted meeting URL (Zoom, Meet, Teams, etc.)
+  platform          String?   // zoom, meet, teams, webex, other
+
+  // Bot joining status
+  botJoined         Boolean   @default(false)
+  botJoinScheduledFor DateTime? // When bot should join
+  botJoinedAt       DateTime?    // When bot actually joined
+
+  // Relations
+  calendarConnectionId String
+  calendarConnection   CalendarConnection @relation(fields: [calendarConnectionId], references: [id], onDelete: Cascade)
+
+  meetingId         String?   @unique
+  meeting           Meeting?  @relation(fields: [meetingId], references: [id])
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([calendarConnectionId, externalEventId])
+  @@index([calendarConnectionId])
+  @@index([startTime])
+  @@index([botJoined])
+  @@index([meetingUrl])
+  @@map("calendar_events")
+}
