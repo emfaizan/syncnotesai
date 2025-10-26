@@ -86,4 +86,16 @@ export const userAPI = {
   deleteAccount: () => api.delete('/users/account'),
 };
 
+// Calendar API
+export const calendarAPI = {
+  getGoogleAuthUrl: () => api.get('/calendar/google/auth'),
+  getConnections: () => api.get('/calendar/connections'),
+  syncConnection: (id: string) => api.post(`/calendar/connections/${id}/sync`),
+  disconnectCalendar: (id: string) => api.delete(`/calendar/connections/${id}`),
+  getUpcomingEvents: (limit?: number) => api.get('/calendar/events', { params: { limit } }),
+  getSettings: () => api.get('/calendar/settings'),
+  updateSettings: (data: { autoJoinEnabled?: boolean; autoJoinLeadTime?: number }) =>
+    api.put('/calendar/settings', data),
+};
+
 export default api;

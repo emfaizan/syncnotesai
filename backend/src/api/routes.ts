@@ -5,6 +5,7 @@ import taskRoutes from './routes/taskRoutes';
 import webhookRoutes from './routes/webhookRoutes';
 import usageRoutes from './routes/usageRoutes';
 import userRoutes from './routes/userRoutes';
+import calendarRoutes from './routes/calendarRoutes';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use('/tasks', taskRoutes);
 router.use('/webhooks', webhookRoutes);
 router.use('/usage', usageRoutes);
 router.use('/users', userRoutes);
+router.use('/calendar', calendarRoutes);
 
 // API info endpoint
 router.get('/', (_req, res) => {
@@ -29,6 +31,7 @@ router.get('/', (_req, res) => {
       webhooks: '/api/webhooks',
       usage: '/api/usage',
       users: '/api/users',
+      calendar: '/api/calendar',
     },
   });
 });
