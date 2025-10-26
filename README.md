@@ -1,4 +1,4 @@
-# SyncNotesAI
+# SyncNotesAI.
 
 AI-powered meeting transcript processor that automatically extracts summaries, decisions, and actionable tasks from meeting transcripts.
 
