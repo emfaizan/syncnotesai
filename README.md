@@ -1,4 +1,4 @@
-# SyncNotesAI..
+# SyncNotesAI
 
 > AI-powered meeting assistant that records, transcribes, and summarizes meetings with automatic task extraction and ClickUp synchronization.
 
