@@ -144,6 +144,7 @@ class MeetingProcessorService {
           return prisma.task.create({
             data: {
               meetingId: meeting.id,
+              userId: meeting.userId,
               title: item.title,
               description: item.description,
               priority: item.priority,

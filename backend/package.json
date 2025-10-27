@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
-    "build": "npm ci && npx tsc",
+    "build": "npm ci && npx prisma generate && npx tsc",
     "start": "node dist/server.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
