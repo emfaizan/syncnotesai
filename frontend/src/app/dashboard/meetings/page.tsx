@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { meetingsAPI } from '../../../lib/api';
+import { meetingsAPI } from '@/services/apiService';
 import {
   Calendar,
   Clock,

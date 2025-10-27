@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { meetingsAPI } from '../../../../lib/api';
+import { meetingsAPI } from '@/services/apiService';
 import {
   ArrowLeft,
   Calendar,

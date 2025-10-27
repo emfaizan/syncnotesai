@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { meetingsAPI, billingAPI, calendarAPI } from '../../lib/api';
+import { meetingsAPI, billingAPI, calendarAPI } from '@/services/apiService';
 import { Calendar, Clock, DollarSign, TrendingUp, Play, CheckCircle, XCircle, Video, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
