@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { clickupAPI, userAPI } from '@/lib/api';
+import { clickupAPI, userAPI } from '../../../lib/api';
 import { CheckCircle, XCircle, ExternalLink, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 

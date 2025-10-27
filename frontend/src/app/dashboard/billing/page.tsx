@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { billingAPI } from '@/lib/api';
+import { billingAPI } from '../../../lib/api';
 import { Clock, TrendingUp, CreditCard, Check, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 

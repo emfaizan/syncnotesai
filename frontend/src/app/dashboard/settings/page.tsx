@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { userAPI, calendarAPI } from '@/lib/api';
+import { userAPI, calendarAPI } from '../../../lib/api';
 import { User, Bell, Trash2, Globe, Save, Calendar, RefreshCw, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
