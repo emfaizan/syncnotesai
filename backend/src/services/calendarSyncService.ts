@@ -152,7 +152,7 @@ export class CalendarSyncService {
       select: { id: true },
     });
 
-    const connectionIds = connections.map(c => c.id);
+    const connectionIds = connections.map((c: any) => c.id);
 
     return prisma.calendarEvent.findMany({
       where: {

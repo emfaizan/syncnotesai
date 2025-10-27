@@ -37,7 +37,9 @@ class MeetingProcessorService {
 
       // Create bot with Recall
       const bot = await recallService.createBot({
-        meeting_url: meetingData.meetingUrl,
+        join_url: meetingData.meetingUrl,
+        platform: 'zoom',
+        webhook_url: process.env.RECALL_WEBHOOK_URL || '',
         bot_name: 'SyncNotesAI',
         recording_mode: 'speaker_view',
         transcription_options: {

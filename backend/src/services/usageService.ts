@@ -26,8 +26,8 @@ export class UsageService {
       },
     });
 
-    const totalMinutes = usage.reduce((sum, record) => sum + record.minutes, 0);
-    const totalCost = usage.reduce((sum, record) => sum + record.cost, 0);
+    const totalMinutes = usage.reduce((sum: number, record: any) => sum + record.minutes, 0);
+    const totalCost = usage.reduce((sum: number, record: any) => sum + record.cost, 0);
 
     return {
       totalMinutes,
