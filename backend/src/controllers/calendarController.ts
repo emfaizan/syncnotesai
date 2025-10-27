@@ -73,7 +73,7 @@ export class CalendarController {
       const connections = await calendarSyncService.getUserConnections(userId);
 
       // Remove sensitive tokens from response
-      const sanitizedConnections = connections.map(conn => ({
+      const sanitizedConnections = connections.map((conn: any) => ({
         id: conn.id,
         provider: conn.provider,
         calendarEmail: conn.calendarEmail,
